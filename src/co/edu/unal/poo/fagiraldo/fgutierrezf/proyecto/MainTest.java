@@ -31,7 +31,6 @@ public class MainTest {
         
 //        EntidadSalud ent = new EntidadSalud("Entidad");
 //        ent.registrarCliente(1233488863, "Fellhipe", "Gutierrez");
-//        ent.registrarCliente(1233488864, "Daniela", "Sanin");
 //        
 //        for (int i = 0; i < ent.getClientes().size(); i++) {
 //            System.out.println(ent.getClientes().get(i).info());
