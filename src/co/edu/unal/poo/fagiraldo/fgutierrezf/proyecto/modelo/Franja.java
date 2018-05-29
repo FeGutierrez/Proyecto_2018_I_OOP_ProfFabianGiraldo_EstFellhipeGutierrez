@@ -22,6 +22,13 @@ public class Franja {
         this.fecha = fecha;
         this.cita = cita;
     }
+    
+    public String info(){
+        if (cita!=null) {
+            return this.id + ", " + this.fecha + ", "+ this.cita.info();
+        }
+        return this.id + ", " + this.fecha;
+    }
 
     public int getId() {
         return id;

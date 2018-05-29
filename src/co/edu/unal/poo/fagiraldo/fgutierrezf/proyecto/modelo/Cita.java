@@ -14,6 +14,52 @@ public class Cita {
     private int codigo;
     private Cliente cliente;
     private Profesional profesional;
+    private Franja fecha;
+
+    public Cita(int codigo, Cliente cliente, Profesional profesional, Franja fecha) {
+        this.codigo = codigo;
+        this.cliente = cliente;
+        this.profesional = profesional;
+        this.fecha = fecha;
+    }
+    
+    public String info(){
+        return this.codigo + "," + this.cliente.getNombre() + "," + this.profesional.getNombre()+ "," +this.fecha.getFecha();
+    }
+
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public Profesional getProfesional() {
+        return profesional;
+    }
+
+    public void setProfesional(Profesional profesional) {
+        this.profesional = profesional;
+    }
+
+    public Franja getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(Franja fecha) {
+        this.fecha = fecha;
+    }
+    
+    
     
     
     

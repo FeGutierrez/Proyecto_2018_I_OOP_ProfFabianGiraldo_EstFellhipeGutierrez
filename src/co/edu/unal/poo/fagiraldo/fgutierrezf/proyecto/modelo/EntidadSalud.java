@@ -53,6 +53,8 @@ public class EntidadSalud {
         return j;
     }
     
+
+    
     public boolean registrarEspecialidad(int codigo, String nombre){
         boolean ex = false;
         boolean j = false;
@@ -72,7 +74,12 @@ public class EntidadSalud {
         return j;
     }
     
-    public boolean registrarProfesional(int cedula, String nombre, String apellido, int codigoEspecialidad){
+//    
+//    public Profesional(int cedula, String nombre, String apellido, boolean 
+//            estadoActivo, Especialidad especialidad, int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
+    
+    public boolean registrarProfesional(int cedula, String nombre, String apellido, 
+            int codigoEspecialidad, int horaInicio, int minuto, int minutosXCita, int horasLaboradas ){
         boolean j= false;
         boolean ex = false;
         Especialidad especialidad =null;
@@ -94,7 +101,11 @@ public class EntidadSalud {
         
         //Especialidad debe ser diferente de nulo
         if (ex == false && especialidad !=null) {
-            Profesional profesional = new Profesional(cedula, nombre, apellido, true, especialidad);
+            //Calendario(int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
+            //public Profesional(int cedula, String nombre, String apellido, boolean 
+            //estadoActivo, Especialidad especialidad, int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
+            Profesional profesional = new Profesional(cedula, nombre, apellido, true, especialidad,
+                horaInicio, minuto, minutosXCita, horasLaboradas);
             this.profesionales.add(profesional);
             j=true;
         } else {
@@ -142,15 +153,67 @@ public class EntidadSalud {
         return j;        
     }
     
-    public boolean registrarCita(){
+    public boolean registrarCita(int cedulaCliente, int cedulaProfesional, int idFranja){
         boolean j= false;
+        //Variables auxiliares
+        Profesional profesional = null;
+        Cliente cliente = null;
+        Franja franja = null;
+        Cita cita = null;
+        //Para registrar una cita se necesita, cedula del profesional
         
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (cedulaProfesional == this.profesionales.get(i).getCedula()) {
+                profesional = this.profesionales.get(i);
+            }
+        }
+        System.out.println(profesional.getCedula());
+        
+        //cedula del cliente
+        for (int i = 0; i < this.clientes.size(); i++) {
+            if (cedulaCliente == this.clientes.get(i).getCedula()) {
+                cliente = this.clientes.get(i);
+            }
+        }
+        System.out.println(cliente.getCedula());
+        if (cliente == null) {
+            //Excepcion
+        } else {
+            if (profesional == null) {
+                //Excepcion
+            } else {
+                for (int i = 0; i < profesional.getAgenda().getFranjas().size(); i++) {
+                    if (idFranja == profesional.getAgenda().getFranjas().get(i).getId()) {
+                        franja = profesional.getAgenda().getFranjas().get(i);
+                    }
+                }
+            }
+        }
+        
+        if (franja == null) {
+            //Excepcion franja no existe
+        } else {
+            //, una franja disponible del profesional
+            if (franja.getCita() !=null) {
+                //Excepcion franja del profesional ya cuenta con cita
+            } else {
+                cita = new Cita(1, cliente, profesional, franja);
+                //Setear la cita en la franja para futuras validaciones
+                franja.setCita(cita);
+                profesional.getCitasAgendadas().add(cita);
+                j = true;
+            }
+        }
+        //if (profesional!=null && cita!=null && cliente !=null) {
+        //     
+        //}
         
         return j;
         
     }
     
-    public boolean registrarEnInventario(Date fechaRegistro, int nitProveedor, int idProdCatalogo, String categoria, int cantidad){
+    public boolean registrarEnInventario(Date fechaRegistro, int nitProveedor, 
+            int idProdCatalogo, String categoria, int cantidad){
         boolean j= false;
         boolean ex = false;
         //Variable auxiliar

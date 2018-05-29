@@ -26,6 +26,9 @@ public class Calendario {
     private int minutosXSesion;
     private int horasLaboradas;
     
+    public String info(){
+        return this.fechaHoraInicio + " min" + this.minutosXSesion + " hr" + this.horasLaboradas;
+    }
     
     public Calendario(int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
         this.fechaHoraInicio = convertiraHora(horaInicio, minuto);
@@ -45,7 +48,7 @@ public class Calendario {
         calendario.setTime(actual);
         
         //Establecer los parámetros de ubicación temporal
-        calendario.set(calendario.HOUR, hora);
+        calendario.set(calendario.HOUR_OF_DAY, hora);
         calendario.set(calendario.MINUTE, minuto);
         calendario.set(calendario.SECOND, 0);
         return calendario.getTime();
@@ -57,9 +60,10 @@ public class Calendario {
         int numFranjas = minutosLaborados/this.minutosXSesion;
         //La fecha inicial de la primera franja es la hora de inicio de el calendario
         
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(this.getFechaHoraInicio());
+        
         for (int i = 0; i < numFranjas; i++) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(this.getFechaHoraInicio());
             //calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+this.minutosXSesion);
             calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+(i*75));
             Date date3 = calendar.getTime();
