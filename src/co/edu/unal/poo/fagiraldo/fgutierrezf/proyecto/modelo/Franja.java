@@ -16,18 +16,21 @@ public class Franja {
     private int id;
     private Date fecha;
     private Cita cita;
+    private boolean libre;
 
     public Franja(int id, Date fecha, Cita cita) {
         this.id = id;
         this.fecha = fecha;
         this.cita = cita;
+        this.libre = true;
     }
     
     public String info(){
         if (cita!=null) {
-            return this.id + ", " + this.fecha + ", "+ this.cita.info();
+            this.libre = false;
+            return this.libre+ " " + this.id + ", " + this.fecha + ", "+ this.cita.info();
         }
-        return this.id + ", " + this.fecha;
+        return this.libre+ " " +this.id + ", " + this.fecha;
     }
 
     public int getId() {

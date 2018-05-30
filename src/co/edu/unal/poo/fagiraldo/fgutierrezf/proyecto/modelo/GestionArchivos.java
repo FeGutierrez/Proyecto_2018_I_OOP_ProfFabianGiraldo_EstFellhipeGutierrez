@@ -9,10 +9,6 @@ package co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo;
  *
  * @author Flexxo333
  */
-public class ArchivoExistenteEx extends Exception{
-
-    public ArchivoExistenteEx(String message) {
-        super(message);
-    }
+public class GestionArchivos {
     
 }

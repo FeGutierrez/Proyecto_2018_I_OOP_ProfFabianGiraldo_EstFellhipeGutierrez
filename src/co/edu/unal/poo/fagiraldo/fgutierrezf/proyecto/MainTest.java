@@ -5,7 +5,15 @@
  */
 package co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto;
 
-import co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo.ArchivoExistenteEx;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.ArchivoExistenteEx;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.ClientNotFoundException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.OccupiedStripeException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.ProfesionalNotFoundException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.RegisteredClientException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.RegisteredProfesionalException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.RegisteredSpecialityException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.SpecialityNotFoundException;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.StripeNotFoundException;
 import co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo.Calendario;
 import co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo.Cita;
 import co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo.Cliente;
@@ -38,7 +46,11 @@ public class MainTest {
         
         
         EntidadSalud ent = new EntidadSalud("Entidad");
-        ent.registrarCliente(1233488863, "Fellhipe", "Gutierrez");
+        try {
+            ent.registrarCliente(1233488863, "Fellhipe", "Gutierrez");
+        } catch (RegisteredClientException ex) {
+            ex.getMessage();
+        }
 //        
 //        for (int i = 0; i < ent.getClientes().size(); i++) {
 //            System.out.println(ent.getClientes().get(i).info());
@@ -47,7 +59,8 @@ public class MainTest {
         //int y,z, w;
         Scanner sc = new Scanner(System.in);
         
-//        y=sc.nextInt();
+        try {
+            //        y=sc.nextInt();
 //        z=sc.nextInt();
 //        w=sc.nextInt();
 //        
@@ -60,38 +73,59 @@ public class MainTest {
 //	String dateInString = "25-05-1997 10:20:56";
 ////      
 //
-        //Calendario agenda = new Calendario(10, 5, 75, 8);
-        
-        //System.out.println("HORA INICIO: " +agenda.getFechaHoraInicio());
+//Calendario agenda = new Calendario(10, 5, 75, 8);
+
+//System.out.println("HORA INICIO: " +agenda.getFechaHoraInicio());
         
 //        for (int i = 0; i < agenda.getFranjas().size(); i++) {
 //            System.out.println(agenda.getFranjas().get(i).getFecha());
 //        }
-        ent.registrarEspecialidad(10, "Osteo");
+ent.registrarEspecialidad(10, "Osteo");
+        } catch (RegisteredSpecialityException ex) {
+            ex.getMessage();
+        }
         //Especialidad esp = new Especialidad(10, "Osteo");
         //Calendario(8, 0, 75, 8);
         //Calendario(int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
-        ent.registrarProfesional(265, "Fellhipe", "Gutierrez",
-                10, 8,0,75,8);
-        ent.registrarProfesional(120, "Fellhipe", "Gutierrez",
+        try {
+            ent.registrarProfesional(265, "Fellhipe", "Gutierrez",
+                    10, 8,0,75,8);
+            ent.registrarProfesional(120, "Fellhipe", "Gutierrez",
                 10, 9,0,75,8);
         ent.registrarProfesional(180, "Fellhipe", "Gutierrez",
                 10, 10,0,75,8);
-        //Profesional prof1 = new Profesional(1233488863, "Fellhipe", "Gutierrez", true, esp, 8 ,0 ,75 ,8);
+        ent.registrarProfesional(180, "Fellhipe", "Gutierrez",
+                11, 10,0,75,8);
+        } catch (RegisteredProfesionalException | SpecialityNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        }
         
+       
+            //Profesional prof1 = new Profesional(1233488863, "Fellhipe", "Gutierrez", true, esp, 8 ,0 ,75 ,8);
+            
 //        System.out.println("Profesional");
 //        for (int i = 0; i < prof1.getAgenda().getFranjas().size(); i++) {
 //            System.out.println(prof1.getAgenda().getFranjas().get(i).getFecha());
 //        }
-        
+        try {
+        ent.registrarCliente(24332, "Karina", "Ramirez");
         ent.registrarCliente(24444, "Karina", "Ramirez");
+        } catch (RegisteredClientException ex) {
+            Logger.getLogger(MainTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         
         
-        //Cliente client1 = new Cliente(24444, "Karina", "Ramirez", true);
-        ent.registrarCita(24444, 265, 1);
-        ent.registrarCita(24444, 265, 2);
-        
-        ent.registrarCita(24444, 120, 4);
+        try {
+            //Cliente client1 = new Cliente(24444, "Karina", "Ramirez", true);
+            ent.registrarCita(24444, 265, 1);
+            ent.registrarCita(24444, 265, 2);
+            ent.registrarCita(24444, 120, 4);
+            ent.registrarCita(24332, 120, 4);
+        } catch (ClientNotFoundException | ProfesionalNotFoundException | StripeNotFoundException | OccupiedStripeException ex) {
+            ex.getMessage();
+        }
+
         
         
 //        for (int i = 0; i < ent.getProfesionales().size(); i++) {

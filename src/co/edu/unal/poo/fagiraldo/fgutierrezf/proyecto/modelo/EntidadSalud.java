@@ -5,9 +5,14 @@
  */
 package co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo;
 
+import com.sun.deploy.association.RegisterFailedException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.time.*;
+import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author Flexxo333
@@ -31,9 +36,13 @@ public class EntidadSalud {
         this.inventario = new ArrayList<>();
         this.especialidades = new ArrayList<>();
         this.productosCatalogo = new ArrayList<>();
+        
     }
     
-    public boolean registrarCliente(int cedula, String nombre, String apellido){
+    
+    //Funciones Constructoras o de registro
+    public boolean registrarCliente(int cedula, String nombre, String apellido) 
+            throws RegisteredClientException{
         boolean ex = false;
         boolean j=false;
         for (int i = 0; i < this.clientes.size(); i++) {
@@ -48,6 +57,7 @@ public class EntidadSalud {
             j = true;
         } else {
             //Excepcion
+            throw new RegisteredClientException();
         }
         
         return j;
@@ -55,7 +65,7 @@ public class EntidadSalud {
     
 
     
-    public boolean registrarEspecialidad(int codigo, String nombre){
+    public boolean registrarEspecialidad(int codigo, String nombre) throws RegisteredSpecialityException{
         boolean ex = false;
         boolean j = false;
         for (int i = 0; i < this.especialidades.size(); i++) {
@@ -70,6 +80,7 @@ public class EntidadSalud {
             j = true;
         } else {
             //Excepcion
+            throw new RegisteredSpecialityException();
         }
         return j;
     }
@@ -79,7 +90,8 @@ public class EntidadSalud {
 //            estadoActivo, Especialidad especialidad, int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
     
     public boolean registrarProfesional(int cedula, String nombre, String apellido, 
-            int codigoEspecialidad, int horaInicio, int minuto, int minutosXCita, int horasLaboradas ){
+            int codigoEspecialidad, int horaInicio, int minuto, int minutosXCita, int horasLaboradas )
+        throws RegisteredProfesionalException , SpecialityNotFoundException{
         boolean j= false;
         boolean ex = false;
         Especialidad especialidad =null;
@@ -91,7 +103,7 @@ public class EntidadSalud {
             }
         }
         
-        //Verificar que el codigo de especlidad ingresado provoque colision en el arrayList
+        //Verificar que el codigo de especialidad ingresado provoque colision en el arrayList
         for (int i = 0; i < this.especialidades.size(); i++) {
             if (this.especialidades.get(i).getCodigo() == codigoEspecialidad) {
                 especialidad = this.especialidades.get(i);
@@ -109,6 +121,12 @@ public class EntidadSalud {
             this.profesionales.add(profesional);
             j=true;
         } else {
+            if (ex==true) {
+                throw new RegisteredProfesionalException();
+            }
+            if (especialidad==null) {
+                throw new SpecialityNotFoundException();
+            }
             //Excepcion
         }
         return j;
@@ -153,7 +171,9 @@ public class EntidadSalud {
         return j;        
     }
     
-    public boolean registrarCita(int cedulaCliente, int cedulaProfesional, int idFranja){
+    public boolean registrarCita(int cedulaCliente, int cedulaProfesional, int idFranja)
+        throws ClientNotFoundException, ProfesionalNotFoundException, StripeNotFoundException,
+            OccupiedStripeException{
         boolean j= false;
         //Variables auxiliares
         Profesional profesional = null;
@@ -161,26 +181,24 @@ public class EntidadSalud {
         Franja franja = null;
         Cita cita = null;
         //Para registrar una cita se necesita, cedula del profesional
-        
         for (int i = 0; i < this.profesionales.size(); i++) {
             if (cedulaProfesional == this.profesionales.get(i).getCedula()) {
                 profesional = this.profesionales.get(i);
             }
         }
-        System.out.println(profesional.getCedula());
-        
         //cedula del cliente
         for (int i = 0; i < this.clientes.size(); i++) {
             if (cedulaCliente == this.clientes.get(i).getCedula()) {
                 cliente = this.clientes.get(i);
             }
         }
-        System.out.println(cliente.getCedula());
         if (cliente == null) {
             //Excepcion
+            throw new ClientNotFoundException();
         } else {
             if (profesional == null) {
                 //Excepcion
+                throw new ProfesionalNotFoundException();
             } else {
                 for (int i = 0; i < profesional.getAgenda().getFranjas().size(); i++) {
                     if (idFranja == profesional.getAgenda().getFranjas().get(i).getId()) {
@@ -189,16 +207,18 @@ public class EntidadSalud {
                 }
             }
         }
-        
         if (franja == null) {
             //Excepcion franja no existe
+            throw new StripeNotFoundException();
         } else {
             //, una franja disponible del profesional
             if (franja.getCita() !=null) {
                 //Excepcion franja del profesional ya cuenta con cita
+                throw  new OccupiedStripeException();
             } else {
-                cita = new Cita(1, cliente, profesional, franja);
+                cita = new Cita(this.citasProgramadas.size()+1, cliente, profesional, franja);
                 //Setear la cita en la franja para futuras validaciones
+                this.citasProgramadas.add(cita);
                 franja.setCita(cita);
                 profesional.getCitasAgendadas().add(cita);
                 j = true;
@@ -213,7 +233,8 @@ public class EntidadSalud {
     }
     
     public boolean registrarEnInventario(Date fechaRegistro, int nitProveedor, 
-            int idProdCatalogo, String categoria, int cantidad){
+            int idProdCatalogo, String categoria, int cantidad) throws
+                ProveedorNotFound, CatalogProductNotFound {
         boolean j= false;
         boolean ex = false;
         //Variable auxiliar
@@ -232,30 +253,210 @@ public class EntidadSalud {
                 prodCat = this.productosCatalogo.get(i);
             }
         }
-        //¿Existe?
-        for (int i = 0; i < this.inventario.size(); i++) {
-            ProductoRegistrado x = this.inventario.get(i);
-            if (x.getProducto()==prodCat && x.getProveedor()==prove) {
-                ex = true;
-                prod = x;
-        }
         
-        if (prove ==null || prodCat==null) {
+        
+        if (prove ==null) {
             //Excepcion existencia proveedores
-        } else
+            throw new ProveedorNotFound();
+        } else {
+            if (prodCat==null) {
+                throw new CatalogProductNotFound();
+            } else {
+                //¿Existe?
+                for (int i = 0; i < this.inventario.size(); i++) {
+                    ProductoRegistrado x = this.inventario.get(i);
+                    if (x.getProducto()==prodCat && x.getProveedor()==prove) {
+                        ex = true;
+                        prod = x;
+                }
+                
+                if (ex == true) {
+                prod.setCantidad(prod.getCantidad() + cantidad);
+                } else {
+                    int id = this.inventario.size()+1;
+                    ProductoRegistrado productoRegistrado = new ProductoRegistrado(id, prodCat, prove, categoria, fechaRegistro);
+                    this.inventario.add(productoRegistrado);
+                }
+            }
+        } 
         //Si existe se añade la cantidad, si no existe, se crea y se hace un set de la cantidad
         //Si existe sabemos que <<prod>> no será un objeto null
-        if (ex == true) {
-            prod.setCantidad(prod.getCantidad() + cantidad);
-        } else {
-            int id = this.inventario.size()+1;
-            ProductoRegistrado productoRegistrado = new ProductoRegistrado(id, prodCat, prove, categoria, fechaRegistro);
-            this.inventario.add(productoRegistrado);
-        }
+        
         }
         return j;
     }
     
+    
+    //***FUNCIONES MODIFICADORAS
+    
+    public boolean editarProfesional(int cedula, String nombre, String apellido, int codigoEspecialidad) 
+            throws ProfesionalNotFoundException, SpecialityNotFoundException{
+        Profesional profesional = null;
+        Especialidad especialidad =null;
+        boolean j = false;
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (this.profesionales.get(i).getCedula() == cedula) {
+                profesional = this.profesionales.get(i);
+            }
+        }
+        for (int i = 0; i < this.especialidades.size(); i++) {
+            if (this.especialidades.get(i).getCodigo() == codigoEspecialidad) {
+                especialidad = this.especialidades.get(i);
+            }
+        }
+        
+        if (profesional==null) {
+            throw new ProfesionalNotFoundException();
+        } else if (especialidad==null) {
+            throw new SpecialityNotFoundException();
+        } else {
+            profesional.setNombre(nombre);
+            profesional.setApellido(apellido);
+            profesional.setEspecialidad(especialidad);
+            j=true;
+        }
+        return j;
+    }
+    
+    public boolean editarCliente(int cedulaCliente, String nombre, String apellido)
+        throws ClientNotFoundException{
+        boolean j = false;
+        Cliente cliente =null;
+        for (int i = 0; i < this.clientes.size(); i++) {
+            if (this.clientes.get(i).getCedula() == cedulaCliente) {
+                cliente = this.clientes.get(i);
+            }
+        }
+        if (cliente == null) {
+            throw new ClientNotFoundException();
+        } else {
+            cliente.setNombre(nombre);
+            cliente.setApellido(apellido);
+            j=true;
+        }
+        return j;
+    }
+    
+    public boolean editarProductoCatalogo(int idProdCat, String nombre) throws CatalogProductNotFound{
+        boolean j= false;
+        Catalogo catalogo =null;
+        for (int i = 0; i < this.productosCatalogo.size(); i++) {
+            if (this.productosCatalogo.get(i).getId() == idProdCat) {
+                catalogo = this.productosCatalogo.get(i);
+            }
+        }
+        if (catalogo == null) {
+            throw new CatalogProductNotFound();
+        } else {
+            catalogo.setNombre(nombre);
+            j=true;
+        }
+        return j;
+    }
+    
+    public boolean editarProveedor(int idProveedor, String nombre) throws ProveedorNotFound{
+        boolean j = false;
+        Proveedor proveedor =null;
+        for (int i = 0; i < this.proveedores.size(); i++) {
+            if (this.proveedores.get(i).getNit() == idProveedor) {
+                proveedor = this.proveedores.get(i);
+            }
+        }
+        if (proveedor == null) {
+            throw new ProveedorNotFound();
+        } else {
+            proveedor.setNombre(nombre);
+            j=true;
+        }
+        return j;
+    }
+    public void editarCita(){
+        
+    }
+    
+    public boolean editarEspecialidad(int codigo, String nombre) throws SpecialityNotFoundException{
+        boolean j = false;
+        Especialidad especialidad =null;
+        for (int i = 0; i < this.especialidades.size(); i++) {
+            if (this.especialidades.get(i).getCodigo()== codigo) {
+                especialidad = this.especialidades.get(i);
+            }
+        }
+        if (especialidad == null) {
+            throw new SpecialityNotFoundException();
+        } else {
+            especialidad.setNombre(nombre);
+            j=true;
+        }
+        return j;
+        
+    }
+    
+    
+    
+    /*
+    ****
+    *FUNCIONES DESTRUCTORAS O DE ELIMINACIÓN
+    ****
+    */
+    public boolean eliminarProfesional(int cedula) throws ProfesionalNotFoundException{
+        boolean j = false;
+        Profesional profesional = null;
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (this.profesionales.get(i).getCedula() == cedula) {
+                profesional = this.profesionales.get(i);
+            }
+        }
+        if (profesional ==null) {
+            throw new ProfesionalNotFoundException();
+        } else {
+            this.profesionales.remove(profesional);
+            j = true;
+        }
+        return j;
+        
+    }
+    
+    public boolean eliminarCliente(int cedula) throws ClientNotFoundException{
+        boolean j = false;
+        Cliente cliente = null;
+        for (int i = 0; i < this.clientes.size(); i++) {
+            if (this.clientes.get(i).getCedula() == cedula) {
+                cliente = this.clientes.get(i);
+            }
+        }
+        if (cliente ==null) {
+            throw new ClientNotFoundException();
+        } else {
+            this.clientes.remove(cliente);
+            j = true;
+        }
+        return j;
+        
+    }
+    
+    public void eliminarProductoCatalogo(){
+        
+    }
+    
+    public void eliminarProveedor(){
+        
+    }
+    
+    public void eliminarCita(){
+        
+    }
+    
+    public void eliminarEspecialidad(){
+        
+    }
+    
+    
+    /*
+    ****
+    **FUNCIONES DE CONSULTA
+    *****
+    */
     
     
     

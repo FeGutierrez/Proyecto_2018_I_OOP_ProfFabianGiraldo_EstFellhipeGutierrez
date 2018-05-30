@@ -27,7 +27,7 @@ public class Calendario {
     private int horasLaboradas;
     
     public String info(){
-        return this.fechaHoraInicio + " min" + this.minutosXSesion + " hr" + this.horasLaboradas;
+        return this.fechaHoraInicio + " , " + this.minutosXSesion + " , " + this.horasLaboradas;
     }
     
     public Calendario(int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
@@ -65,7 +65,7 @@ public class Calendario {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(this.getFechaHoraInicio());
             //calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+this.minutosXSesion);
-            calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+(i*75));
+            calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE)+(i*minutosXSesion));
             Date date3 = calendar.getTime();
             Franja franja = new Franja(i+1, date3, null);
             arregloFranjas.add(franja);
