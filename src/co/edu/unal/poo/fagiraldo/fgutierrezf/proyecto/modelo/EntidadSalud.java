@@ -370,7 +370,45 @@ public class EntidadSalud {
         }
         return j;
     }
-    public void editarCita(){
+    public void editarCita(int codigo, int cedulaProfesional, int idFranja) throws AppointmentNotFoundException
+        , ClientNotFoundException, ProfesionalNotFoundException, StripeNotFoundException, OccupiedStripeException{
+        Cita cita =null;
+        Cita citaAux = null;
+        int cedulaCliente = 0;
+        for (int i = 0; i < this.citasProgramadas.size(); i++) {
+            if (this.citasProgramadas.get(i).getCodigo()==codigo) {
+                cita = this.citasProgramadas.get(i);
+            }
+        }
+        if (cita == null) {
+            throw new AppointmentNotFoundException();
+        } else {
+            //Buscar en la cita en las franjas de los profesionales extraerla y retirarla de la franja
+            for (int i = 0; i < this.profesionales.size(); i++) {
+                for (int j = 0; j < this.profesionales.get(i).getAgenda().getFranjas().size(); j++) {
+                    if (cita == this.profesionales.get(i).getAgenda().getFranjas().get(j).getCita()) {
+                        citaAux = this.profesionales.get(i).getAgenda().getFranjas().get(j).getCita();
+                        //Se retra de cita pero no del arrayList de citas de la entidad
+                        this.profesionales.get(i).getAgenda().getFranjas().get(j).setCita(null);
+                    }
+                }
+            }
+            if (citaAux == null) {
+                throw new AppointmentNotFoundException();
+            } else {
+                //Extraer cedula y poner estado en false
+                cedulaCliente = citaAux.getCliente().getCedula();
+                citaAux.setActiva(false);
+            }
+            if (cedulaCliente == 0) {
+                throw new ClientNotFoundException();
+            } else {
+                //Registrar nueva cita con el cliente de la cita que se ha modificado, 
+                //el profesional deseado y la franja de ese profesional (Si existe)
+                registrarCita(cedulaCliente, cedulaProfesional, idFranja);
+                //Asignar la cita al id del profesional en el id de franja del mismo
+            }
+        }
         
     }
     
@@ -443,7 +481,7 @@ public class EntidadSalud {
         
     }
     
-    public void eliminarCita(){
+    public void cancelarCita(){
         
     }
     

@@ -15,16 +15,18 @@ public class Cita {
     private Cliente cliente;
     private Profesional profesional;
     private Franja fecha;
+    private boolean activa;
 
     public Cita(int codigo, Cliente cliente, Profesional profesional, Franja fecha) {
         this.codigo = codigo;
         this.cliente = cliente;
         this.profesional = profesional;
         this.fecha = fecha;
+        this.activa = true;
     }
     
     public String info(){
-        return this.codigo + "," + this.cliente.getNombre() + "," + this.profesional.getNombre()+ "," +this.fecha.getFecha();
+        return this.codigo + "," + this.cliente.getNombre() + "," + this.profesional.getNombre()+ "," +this.fecha.getFecha() + " " + this.activa;
     }
 
     public int getCodigo() {
@@ -58,10 +60,13 @@ public class Cita {
     public void setFecha(Franja fecha) {
         this.fecha = fecha;
     }
-    
-    
-    
-    
-    
+
+    public boolean isActiva() {
+        return activa;
+    }
+
+    public void setActiva(boolean activa) {
+        this.activa = activa;
+    }
     
 }
