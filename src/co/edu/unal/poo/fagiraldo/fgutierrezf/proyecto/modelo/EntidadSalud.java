@@ -5,13 +5,9 @@
  */
 package co.edu.unal.poo.fagiraldo.fgutierrezf.proyecto.modelo;
 
-import com.sun.deploy.association.RegisterFailedException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.time.*;
 import co.edu.unal.poo.fagiraldo.fgutierrezf.excepciones.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -59,7 +55,6 @@ public class EntidadSalud {
             //Excepcion
             throw new RegisteredClientException();
         }
-        
         return j;
     }
     
@@ -69,11 +64,10 @@ public class EntidadSalud {
         boolean ex = false;
         boolean j = false;
         for (int i = 0; i < this.especialidades.size(); i++) {
-            if (codigo == this.especialidades.get(i).getCodigo()) {
+            if (codigo == this.especialidades.get(i).getCodigo() || nombre.equals(this.especialidades.get(i).getNombre())) {
                 ex = true;
             }
         }
-        
         if (ex==false) {
             Especialidad especialidad = new Especialidad(codigo, nombre);
             this.especialidades.add(especialidad);
@@ -102,15 +96,12 @@ public class EntidadSalud {
                 ex = true;
             }
         }
-        
         //Verificar que el codigo de especialidad ingresado provoque colision en el arrayList
         for (int i = 0; i < this.especialidades.size(); i++) {
             if (this.especialidades.get(i).getCodigo() == codigoEspecialidad) {
                 especialidad = this.especialidades.get(i);
             }
         }
-        
-        
         //Especialidad debe ser diferente de nulo
         if (ex == false && especialidad !=null) {
             //Calendario(int horaInicio, int minuto, int minutosXSesion, int horasLaboradas) {
@@ -130,7 +121,6 @@ public class EntidadSalud {
             //Excepcion
         }
         return j;
-                
     }
     
     public boolean registrarProveedor(int nit, String nombre){
@@ -146,16 +136,12 @@ public class EntidadSalud {
             this.proveedores.add(proveedor);
             j = true;
         }
-        
-        
         return j;
-        
     }
     
     public boolean regisrarProductoCatalogo(int id, String nombre){
         boolean j= false;
         boolean ex= false;
-        
         //¿Existe?
         for (int i = 0; i < this.productosCatalogo.size(); i++) {
             if (this.productosCatalogo.get(i).getId() == id) {
@@ -427,17 +413,14 @@ public class EntidadSalud {
             j=true;
         }
         return j;
-        
     }
-    
-    
     
     /*
     ****
-    *FUNCIONES DESTRUCTORAS O DE ELIMINACIÓN
+    *FUNCIONES DESTRUCTORAS O DE ELIMINACIÓN (FISICA Y/O LOGICA)
     ****
     */
-    public boolean eliminarProfesional(int cedula) throws ProfesionalNotFoundException{
+    public boolean desactivarProfesional(int cedula) throws ProfesionalNotFoundException{
         boolean j = false;
         Profesional profesional = null;
         for (int i = 0; i < this.profesionales.size(); i++) {
@@ -448,14 +431,14 @@ public class EntidadSalud {
         if (profesional ==null) {
             throw new ProfesionalNotFoundException();
         } else {
-            this.profesionales.remove(profesional);
+            profesional.setEstadoActivo(false);
             j = true;
         }
         return j;
         
     }
     
-    public boolean eliminarCliente(int cedula) throws ClientNotFoundException{
+    public boolean desactivarCliente(int cedula) throws ClientNotFoundException{
         boolean j = false;
         Cliente cliente = null;
         for (int i = 0; i < this.clientes.size(); i++) {
@@ -466,7 +449,7 @@ public class EntidadSalud {
         if (cliente ==null) {
             throw new ClientNotFoundException();
         } else {
-            this.clientes.remove(cliente);
+            cliente.setEstadoActivo(false);
             j = true;
         }
         return j;
@@ -477,16 +460,74 @@ public class EntidadSalud {
         
     }
     
-    public void eliminarProveedor(){
-        
+    public boolean desactivarProveedor(int nit) throws ProveedorNotFound{
+        boolean j=false;
+        Proveedor proveedor = null;
+        for (int i = 0; i < this.proveedores.size(); i++) {
+            if (this.proveedores.get(i).getNit() == nit) {
+                proveedor = this.proveedores.get(i);
+            }
+        }
+        if (proveedor == null) {
+            throw new ProveedorNotFound();
+        } else {
+            proveedor.setEstadoActivo(false);
+            j = true;
+        }
+        return j;
     }
     
-    public void cancelarCita(){
-        
+    public boolean cancelarCita(int codigo) throws AppointmentNotFoundException{
+        Cita cita =null;
+        boolean a = false;
+        for (int i = 0; i < this.citasProgramadas.size(); i++) {
+            if (this.citasProgramadas.get(i).getCodigo()==codigo) {
+                cita = this.citasProgramadas.get(i);
+            }
+        }
+        if (cita == null) {
+            throw new AppointmentNotFoundException();
+        } else {
+            //Buscar la cita en las franjas de los profesionales extraerla y retirarla de la franja
+            for (int i = 0; i < this.profesionales.size(); i++) {
+                for (int j = 0; j < this.profesionales.get(i).getAgenda().getFranjas().size(); j++) {
+                    if (cita == this.profesionales.get(i).getAgenda().getFranjas().get(j).getCita()) {
+                        //Se retra de cita pero no del arrayList de citas de la entidad
+                        cita.setActiva(false);
+                        this.profesionales.get(i).getAgenda().getFranjas().get(j).setCita(null);
+                        a = true;
+                    }
+                }
+            }
+        }
+        return a;
     }
     
-    public void eliminarEspecialidad(){
-        
+    public boolean eliminarEspecialidad(int codigo) throws SpecialityNotFoundException{
+        //Hay que mostrar una advertencia de que esto dejará sin 
+        //especialidad a los profesionales que la posean
+        //Buscarla
+        boolean j = false;
+        Especialidad especialidad = null;
+        for (int i = 0; i < this.especialidades.size(); i++) {
+            if (this.especialidades.get(i).getCodigo() == codigo) {
+                especialidad = this.especialidades.get(i);
+            }
+        }
+        if (especialidad == null) {
+            throw new SpecialityNotFoundException();
+        } else {
+            //Quitarla de los profesioanles que la poseen, seteando null
+            for (int i = 0; i < this.profesionales.size(); i++) {
+                if (this.profesionales.get(i).getEspecialidad() == especialidad) {
+                    this.profesionales.get(i).setEspecialidad(null);
+                    j = true;
+                }
+            }
+            //Eliminarla de la lista
+            this.especialidades.remove(especialidad);
+        }
+        return j;
     }
     
     
@@ -495,6 +536,188 @@ public class EntidadSalud {
     **FUNCIONES DE CONSULTA
     *****
     */
+    //Clientes
+    public String listarTodosClientes(){
+        String str = "";
+        for (int i = 0; i < this.clientes.size(); i++) {
+            str+= this.clientes.get(i).info();
+        }
+        return str;
+    }
+    
+    public String listarClientesActivos(){
+        String str = "";
+        for (int i = 0; i < this.clientes.size(); i++) {
+            if (this.clientes.get(i).isEstadoActivo()) {
+                str+= this.clientes.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    public String listarClientesNoActivos(){
+        String str = "";
+        for (int i = 0; i < this.clientes.size(); i++) {
+            if (!this.clientes.get(i).isEstadoActivo()) {
+                str+= this.clientes.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    //Profesionales
+    public String listarTodosLosProfesionales(){
+        String str = "";
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            str += this.profesionales.get(i).info();
+        }
+        return str;
+    }
+    
+    public String listarProfesionalesActivos(){
+        String str = "";
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (this.profesionales.get(i).isEstadoActivo()) {
+                str += this.profesionales.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    public String listarProfesionalesNoActivos(){
+        String str = "";
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (!this.profesionales.get(i).isEstadoActivo()) {
+                str += this.profesionales.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    //Citas
+    public String listarTodasCitas(){
+        String str = "";
+        for (int i = 0; i < this.citasProgramadas.size(); i++) {
+            str += this.citasProgramadas.get(i).info();
+        }
+        return str;
+    }
+    
+    public String listarCitasActivas(){
+        String str = "";
+        for (int i = 0; i < this.citasProgramadas.size(); i++) {
+            if (this.citasProgramadas.get(i).isActiva()) {
+                str += this.citasProgramadas.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    public String listarCitasNoActivas(){
+        String str = "";
+        for (int i = 0; i < this.citasProgramadas.size(); i++) {
+            if (!this.citasProgramadas.get(i).isActiva()) {
+                str += this.citasProgramadas.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    //Proveedores
+    public String listarTodosProveedores(){
+        String str = "";
+        for (int i = 0; i < this.proveedores.size(); i++) {
+            str += this.proveedores.get(i).info();
+        }
+        return str;
+    }
+    
+    public String listarProveedoresActivos(){
+        String str = "";
+        for (int i = 0; i < this.proveedores.size(); i++) {
+            if (this.proveedores.get(i).isEstadoActivo()) {
+                str += this.proveedores.get(i).info();
+            }
+        }
+        return str;
+    }
+    
+    public String listarProveedoresNoActivos(){
+        String str = "";
+        for (int i = 0; i < this.proveedores.size(); i++) {
+            if (!this.proveedores.get(i).isEstadoActivo()) {
+                str += this.proveedores.get(i).info();
+            }
+        }
+        return str;
+    }
+    //Productos
+    public String listarTodosProductosEnInventario(){
+        String str = "";
+        for (int i = 0; i < this.inventario.size(); i++) {
+            str += this.inventario.get(i).info();
+        }
+        return str;
+    }
+    
+    public String listarProductosEnCatalogo(){
+        String str = "";
+        for (int i = 0; i < this.productosCatalogo.size(); i++) {
+            str += this.productosCatalogo.get(i).info();
+        }
+        return str;
+    }
+    //Especialidades
+    public String listarTodasEspecialidades(){
+        String str = "";
+        for (int i = 0; i < this.especialidades.size(); i++) {
+            str += this.especialidades.get(i).info();
+        }
+        return str;
+    }
+    public String listarFranjasdelProfesional(int cedula) throws ProfesionalNotFoundException{
+    String str = "";
+    Profesional profesional = null;
+    //Hallar profesional
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            if (this.profesionales.get(i).getCedula() == cedula) {
+                profesional = this.profesionales.get(i);
+            }
+        }
+        if (profesional==null) {
+            throw new ProfesionalNotFoundException();
+        } else {
+            for (int i = 0; i < profesional.getAgenda().getFranjas().size(); i++) {
+                str += profesional.getAgenda().getFranjas().get(i).info();
+            }
+        }
+        return str;
+    }
+    public String listarFranjasLibres() {
+    String str = "";
+    //Hallar profesional
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            for (int j = 0; j < this.profesionales.get(i).getAgenda().getFranjas().size(); j++) {
+                if (this.profesionales.get(i).getAgenda().getFranjas().get(j).getCita()==null ) {
+                    str += this.profesionales.get(i).getAgenda().getFranjas().get(j).info();
+                }
+            }
+        }
+        return str;
+    }
+    public String listarFranjasOcupadas(){
+    String str = "";
+    //Hallar profesional
+        for (int i = 0; i < this.profesionales.size(); i++) {
+            for (int j = 0; j < this.profesionales.get(i).getAgenda().getFranjas().size(); j++) {
+                if (this.profesionales.get(i).getAgenda().getFranjas().get(j).getCita()!=null ) {
+                    str += this.profesionales.get(i).getAgenda().getFranjas().get(j).info();
+                }
+            }
+        }
+        return str;
+    }
+    
     
     
     
